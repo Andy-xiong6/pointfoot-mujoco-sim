@@ -57,6 +57,73 @@ class SimulatorMujoco:
     # Callback for keypress events in the MuJoCo viewer (currently does nothing)
     def key_callback(self, keycode):
         pass
+    
+    def align_joint_order(self):
+        self.robot_state.q[0] = self.mujoco_data.qpos[7]
+        self.robot_state.dq[0] = self.mujoco_data.qvel[6]
+        self.robot_state.tau[0] = self.mujoco_data.ctrl[0]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[0] = (
+            self.robot_cmd.Kp[0] * (self.robot_cmd.q[0] - self.robot_state.q[0]) + 
+            self.robot_cmd.Kd[0] * (self.robot_cmd.dq[0] - self.robot_state.dq[0]) + 
+            self.robot_cmd.tau[0]
+        )
+        
+        self.robot_state.q[1] = self.mujoco_data.qpos[3 + 7]
+        self.robot_state.dq[1] = self.mujoco_data.qvel[3 + 6]
+        self.robot_state.tau[1] = self.mujoco_data.ctrl[3]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[3] = (
+            self.robot_cmd.Kp[1] * (self.robot_cmd.q[1] - self.robot_state.q[1]) + 
+            self.robot_cmd.Kd[1] * (self.robot_cmd.dq[1] - self.robot_state.dq[1]) + 
+            self.robot_cmd.tau[1]
+        )
+        
+        self.robot_state.q[2] = self.mujoco_data.qpos[1 + 7]
+        self.robot_state.dq[2] = self.mujoco_data.qvel[1 + 6]
+        self.robot_state.tau[2] = self.mujoco_data.ctrl[1]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[1] = (
+            self.robot_cmd.Kp[2] * (self.robot_cmd.q[2] - self.robot_state.q[2]) + 
+            self.robot_cmd.Kd[2] * (self.robot_cmd.dq[2] - self.robot_state.dq[2]) + 
+            self.robot_cmd.tau[2]
+        )
+        
+        self.robot_state.q[3] = self.mujoco_data.qpos[4 + 7]
+        self.robot_state.dq[3] = self.mujoco_data.qvel[4 + 6]
+        self.robot_state.tau[3] = self.mujoco_data.ctrl[4]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[4] = (
+            self.robot_cmd.Kp[3] * (self.robot_cmd.q[3] - self.robot_state.q[3]) + 
+            self.robot_cmd.Kd[3] * (self.robot_cmd.dq[3] - self.robot_state.dq[3]) + 
+            self.robot_cmd.tau[3]
+        )
+        
+        self.robot_state.q[4] = self.mujoco_data.qpos[2 + 7]
+        self.robot_state.dq[4] = self.mujoco_data.qvel[2 + 6]
+        self.robot_state.tau[4] = self.mujoco_data.ctrl[2]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[2] = (
+            self.robot_cmd.Kp[4] * (self.robot_cmd.q[4] - self.robot_state.q[4]) + 
+            self.robot_cmd.Kd[4] * (self.robot_cmd.dq[4] - self.robot_state.dq[4]) + 
+            self.robot_cmd.tau[4]
+        )
+        
+        self.robot_state.q[5] = self.mujoco_data.qpos[5 + 7]
+        self.robot_state.dq[5] = self.mujoco_data.qvel[5 + 6]
+        self.robot_state.tau[5] = self.mujoco_data.ctrl[5]
+
+        # Apply control commands to the robot based on the received robot command data
+        self.mujoco_data.ctrl[5] = (
+            self.robot_cmd.Kp[5] * (self.robot_cmd.q[5] - self.robot_state.q[5]) + 
+            self.robot_cmd.Kd[5] * (self.robot_cmd.dq[5] - self.robot_state.dq[5]) + 
+            self.robot_cmd.tau[5]
+        )
 
     def run(self):
         frame_count = 0
@@ -66,17 +133,7 @@ class SimulatorMujoco:
             mujoco.mj_step(self.mujoco_model, self.mujoco_data)
 
             # Update robot state data from simulation
-            for i in range(self.joint_num):
-                self.robot_state.q[i] = self.mujoco_data.qpos[i + 7]
-                self.robot_state.dq[i] = self.mujoco_data.qvel[i + 6]
-                self.robot_state.tau[i] = self.mujoco_data.ctrl[i]
-
-                # Apply control commands to the robot based on the received robot command data
-                self.mujoco_data.ctrl[i] = (
-                    self.robot_cmd.Kp[i] * (self.robot_cmd.q[i] - self.robot_state.q[i]) + 
-                    self.robot_cmd.Kd[i] * (self.robot_cmd.dq[i] - self.robot_state.dq[i]) + 
-                    self.robot_cmd.tau[i]
-                )
+            self.align_joint_order()
         
             # Set the timestamp for the current robot state and publish it
             self.robot_state.stamp = time.time_ns()
